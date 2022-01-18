@@ -63,16 +63,50 @@ $ python tasks.py report # Statistics"""
         )
 
     def add(self, args):
-        pass
+        priority = int(args[0])
+        task = args[1]
+        if priority in self.current_items.keys():
+            for key in sorted(self.current_items.keys(), reverse=True):
+                self.current_items[key+1] = self.current_items[key]
+                if key == priority:
+                    break
+        self.current_items[priority] = task
+        self.write_current()
+        print(f"Added task: \"{task}\" with priority {priority}")
 
     def done(self, args):
-        pass
+        priority = int(args[0])
+        if priority not in self.current_items.keys():
+            print(
+                f"Error: no incomplete item with priority {priority} exists.")
+            return
+
+        task = self.current_items[priority]
+        self.current_items.pop(priority)
+        self.completed_items.append(task)
+        self.write_current()
+        self.write_completed()
+        print("Marked item as done.")
 
     def delete(self, args):
-        pass
+        priority = int(args[0])
+        if priority not in self.current_items.keys():
+            print(
+                f"Error: item with priority {priority} does not exist. Nothing deleted.")
+            return
+
+        task = self.current_items[priority]
+        self.current_items.pop(priority)
+        self.write_current()
+        print(f"Deleted item with priority {priority}")
 
     def ls(self):
-        pass
+        for index, (key, value) in enumerate(self.current_items.items(), start=1):
+            print(f"{index}. {value} [{key}]")
 
     def report(self):
-        pass
+        print(f"Pending : {len(self.current_items.keys())}")
+        self.ls()
+        print(f"\nCompleted : {len(self.completed_items)}")
+        for index, task in enumerate(self.completed_items, start=1):
+            print(f"{index}. {task}")
