@@ -1,3 +1,6 @@
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+
 class TasksCommand:
     TASKS_FILE = "tasks.txt"
     COMPLETED_TASKS_FILE = "completed.txt"
@@ -35,6 +38,14 @@ class TasksCommand:
             for item in self.completed_items:
                 f.write(f"{item}\n")
 
+    def runserver(self):
+        address = "127.0.0.1"
+        port = 8000
+        server_address = (address, port)
+        httpd = HTTPServer(server_address, TasksServer)
+        print(f"Started HTTP Server on http://{address}:{port}")
+        httpd.serve_forever()
+
     def run(self, command, args):
         self.read_current()
         self.read_completed()
@@ -48,6 +59,8 @@ class TasksCommand:
             self.ls()
         elif command == "report":
             self.report()
+        elif command == "runserver":
+            self.runserver()
         elif command == "help":
             self.help()
 
@@ -59,54 +72,46 @@ $ python tasks.py ls # Show incomplete priority list items sorted by priority in
 $ python tasks.py del PRIORITY_NUMBER # Delete the incomplete item with the given priority number
 $ python tasks.py done PRIORITY_NUMBER # Mark the incomplete item with the given PRIORITY_NUMBER as complete
 $ python tasks.py help # Show usage
-$ python tasks.py report # Statistics"""
+$ python tasks.py report # Statistics
+$ python tasks.py runserver # Starts the tasks management server"""
         )
 
     def add(self, args):
-        priority = int(args[0])
-        task = args[1]
-        if priority in self.current_items.keys():
-            for key in sorted(self.current_items.keys(), reverse=True):
-                self.current_items[key+1] = self.current_items[key]
-                if key == priority:
-                    break
-        self.current_items[priority] = task
-        self.write_current()
-        print(f"Added task: \"{task}\" with priority {priority}")
+        pass  # Use your existing implementation
 
     def done(self, args):
-        priority = int(args[0])
-        if priority not in self.current_items.keys():
-            print(
-                f"Error: no incomplete item with priority {priority} exists.")
-            return
-
-        task = self.current_items[priority]
-        self.current_items.pop(priority)
-        self.completed_items.append(task)
-        self.write_current()
-        self.write_completed()
-        print("Marked item as done.")
+        pass  # Use your existing implementation
 
     def delete(self, args):
-        priority = int(args[0])
-        if priority not in self.current_items.keys():
-            print(
-                f"Error: item with priority {priority} does not exist. Nothing deleted.")
-            return
-
-        task = self.current_items[priority]
-        self.current_items.pop(priority)
-        self.write_current()
-        print(f"Deleted item with priority {priority}")
+        pass  # Use your existing implementation
 
     def ls(self):
-        for index, (key, value) in enumerate(self.current_items.items(), start=1):
-            print(f"{index}. {value} [{key}]")
+        pass  # Use your existing implementation
 
     def report(self):
-        print(f"Pending : {len(self.current_items.keys())}")
-        self.ls()
-        print(f"\nCompleted : {len(self.completed_items)}")
-        for index, task in enumerate(self.completed_items, start=1):
-            print(f"{index}. {task}")
+        pass  # Use your existing implementation
+
+    def render_pending_tasks(self):
+        # Complete this method to return all incomplete tasks as HTML
+        return "<h1> Show Incomplete Tasks Here </h1>"
+
+    def render_completed_tasks(self):
+        # Complete this method to return all completed tasks as HTML
+        return "<h1> Show Completed Tasks Here </h1>"
+
+
+class TasksServer(TasksCommand, BaseHTTPRequestHandler):
+    def do_GET(self):
+        task_command_object = TasksCommand()
+        if self.path == "/tasks":
+            content = task_command_object.render_pending_tasks()
+        elif self.path == "/completed":
+            content = task_command_object.render_completed_tasks()
+        else:
+            self.send_response(404)
+            self.end_headers()
+            return
+        self.send_response(200)
+        self.send_header("content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(content.encode())
