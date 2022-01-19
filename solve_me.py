@@ -21,7 +21,7 @@ class TasksCommand:
     def read_completed(self):
         try:
             file = open(self.COMPLETED_TASKS_FILE, "r")
-            self.completed_items = file.readlines()
+            self.completed_items.extend(file.readlines())
             file.close()
         except Exception:
             pass
@@ -77,27 +77,65 @@ $ python tasks.py runserver # Starts the tasks management server"""
         )
 
     def add(self, args):
-        pass  # Use your existing implementation
+        priority = int(args[0])
+        task = args[1]
+        if priority in self.current_items.keys():
+            for key in sorted(self.current_items.keys(), reverse=True):
+                self.current_items[key+1] = self.current_items[key]
+                if key == priority:
+                    break
+        self.current_items[priority] = task
+        self.write_current()
+        print(f"Added task: \"{task}\" with priority {priority}")
 
     def done(self, args):
-        pass  # Use your existing implementation
+        priority = int(args[0])
+        if priority not in self.current_items.keys():
+            print(
+                f"Error: no incomplete item with priority {priority} exists.")
+            return
+
+        task = self.current_items[priority]
+        self.current_items.pop(priority)
+        self.completed_items.append(task)
+        self.write_current()
+        self.write_completed()
+        print("Marked item as done.")
 
     def delete(self, args):
-        pass  # Use your existing implementation
+        priority = int(args[0])
+        if priority not in self.current_items.keys():
+            print(
+                f"Error: item with priority {priority} does not exist. Nothing deleted.")
+            return
+
+        task = self.current_items[priority]
+        self.current_items.pop(priority)
+        self.write_current()
+        print(f"Deleted item with priority {priority}")
 
     def ls(self):
-        pass  # Use your existing implementation
+        for index, (key, value) in enumerate(self.current_items.items(), start=1):
+            print(f"{index}. {value} [{key}]")
 
     def report(self):
-        pass  # Use your existing implementation
+        print(f"Pending : {len(self.current_items.keys())}")
+        self.ls()
+        print(f"\nCompleted : {len(self.completed_items)}")
+        for index, task in enumerate(self.completed_items, start=1):
+            print(f"{index}. {task}")
 
     def render_pending_tasks(self):
-        # Complete this method to return all incomplete tasks as HTML
-        return "<h1> Show Incomplete Tasks Here </h1>"
+        tasks_list = [f"<li>{task} [{priority}]</li>" for priority,
+                      task in self.current_items.items()]
+        tasks_list_string = "".join(tasks_list)
+        return f"<ol>{tasks_list_string}</ol>"
 
     def render_completed_tasks(self):
-        # Complete this method to return all completed tasks as HTML
-        return "<h1> Show Completed Tasks Here </h1>"
+        tasks_list = [f"<li> {item} </li>" for item in self.completed_items]
+        tasks_list_string = " ".join(tasks_list)
+        print(self.completed_items)
+        return f"<ol>{tasks_list_string}</ol>"
 
 
 class TasksServer(TasksCommand, BaseHTTPRequestHandler):
@@ -115,3 +153,6 @@ class TasksServer(TasksCommand, BaseHTTPRequestHandler):
         self.send_header("content-type", "text/html")
         self.end_headers()
         self.wfile.write(content.encode())
+
+    def do_POST(self):
+        pass
