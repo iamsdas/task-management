@@ -1,0 +1,20 @@
+<h1>Tasks Management Application</h1>
+
+<form action="/add-task" method="get">
+  <input type="text" name="task" />
+  <button type="submit">Add Task</button>
+</form>
+
+<h2>Tasks:</h2>
+<ol>
+  {% for task in tasks %}
+  <li>
+    <span>{{task}}</span>
+    <a href="/delete-task/{{forloop.counter}}">delete</a>
+    <a href="/complete_task/{{forloop.counter}}">mark as completd</a>
+  </li>
+  {% endfor %}
+</ol>
+
+<a href="/completed_tasks">complted tasks page</a>
+<a href="/all_tasks">all tasks page</a>
