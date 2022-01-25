@@ -10,7 +10,7 @@
 <ol>
   {% for task in tasks %}
   <li>
-    <span>{{task.title}} - {{task.created_date}}</span>
+    <span>{{task.title}} [{{task.priority}}]</span>
     <a href="/delete_task/{{task.id}}">delete</a>
     <a href="/complete_task/{{task.id}}">mark as completd</a>
     <a href="/update_task/{{task.id}}">Update Task</a>

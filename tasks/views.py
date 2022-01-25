@@ -36,13 +36,27 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 class TaskCreateForm(ModelForm):
     def clean_title(self):
         title = self.cleaned_data["title"]
-        if len(title) < 10:
+        if len(title) < 4:
             raise ValidationError("Title not cleaned")
         return title.upper()
 
+    def clean_priority(self):
+        priority = self.cleaned_data["priority"]
+        self.priority_update(priority)
+        return priority
+
+    def priority_update(self, priority: int):
+        try:
+            task_obj = Task.objects.filter(priority=priority)
+            self.priority_update(priority + 1)
+        except:
+            task_obj = None
+        if task_obj:
+            task_obj.update(priority=priority + 1)
+
     class Meta:
         model = Task
-        fields = ["title", "description", "completed"]
+        fields = ["title", "description", "completed", "priority"]
 
 
 class GenericCreateTaskView(CreateView):
@@ -82,7 +96,7 @@ class UserLoginView(LoginView):
 class UserCreateView(CreateView):
     form_class = UserCreationForm
     template_name = "user_create.html"
-    success_url = "/login"
+    success_url = "/user/login"
 
 
 def completed_tasks_view(request: HttpRequest):
