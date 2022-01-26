@@ -4,8 +4,7 @@ from django.contrib.auth.views import LoginView
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponseRedirect
-from django.shortcuts import render
-from django.views.generic import ListView
+from django.views.generic import ListView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
@@ -14,7 +13,9 @@ from tasks.models import Task
 
 class AuthorizedTaskManager(LoginRequiredMixin):
     def get_queryset(self):
-        return Task.objects.filter(deleted=False, user=self.request.user)
+        return Task.objects.filter(deleted=False, user=self.request.user).order_by(
+            "priority"
+        )
 
 
 class GenericTaskView(LoginRequiredMixin, ListView):
@@ -24,19 +25,24 @@ class GenericTaskView(LoginRequiredMixin, ListView):
     paginate_by = 5
 
     def get_queryset(self):
+        tasks = Task.objects.filter(deleted=False, user=self.request.user)
+        task_type = self.request.GET.get("type")
         search_term = self.request.GET.get("search")
-        tasks = Task.objects.filter(
-            deleted=False, completed=False, user=self.request.user
-        )
+
+        if task_type == "completed":
+            tasks = tasks.filter(completed=True)
+        elif task_type in (None, "pending"):
+            tasks = tasks.filter(completed=False)
         if search_term:
             tasks = tasks.filter(title__icontains=search_term)
-        return tasks
+
+        return tasks.order_by("priority")
 
 
 class TaskCreateForm(ModelForm):
     def clean_title(self):
         title = self.cleaned_data["title"]
-        if len(title) < 4:
+        if len(title) < 1:
             raise ValidationError("Title not cleaned")
         return title.upper()
 
@@ -46,12 +52,9 @@ class TaskCreateForm(ModelForm):
         return priority
 
     def priority_update(self, priority: int):
-        try:
-            task_obj = Task.objects.filter(priority=priority)
+        task_obj = Task.objects.filter(priority=priority)
+        if task_obj.exists():
             self.priority_update(priority + 1)
-        except:
-            task_obj = None
-        if task_obj:
             task_obj.update(priority=priority + 1)
 
     class Meta:
@@ -89,6 +92,14 @@ class GenericTaskDeleteView(AuthorizedTaskManager, DeleteView):
     success_url = "/tasks"
 
 
+class MarkTaskCompleteView(AuthorizedTaskManager, View):
+    def get(self, request: HttpRequest, pk: int):
+        task_obj = self.get_queryset().filter(id=pk)
+        if task_obj.exists():
+            task_obj.update(completed=True)
+        return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+
+
 class UserLoginView(LoginView):
     template_name = "user_login.html"
 
@@ -97,23 +108,3 @@ class UserCreateView(CreateView):
     form_class = UserCreationForm
     template_name = "user_create.html"
     success_url = "/user/login"
-
-
-def completed_tasks_view(request: HttpRequest):
-    tasks = Task.objects.filter(deleted=False, completed=True)
-    return render(request, "tasks_list.html", {"completed_tasks": tasks})
-
-
-def all_tasks_view(request: HttpRequest):
-    completed_tasks = Task.objects.filter(deleted=False, completed=True)
-    pending_tasks = Task.objects.filter(deleted=False, completed=False)
-    return render(
-        request,
-        "tasks_list.html",
-        {"pending_tasks": pending_tasks, "completed_tasks": completed_tasks},
-    )
-
-
-def complete_task_view(request: HttpRequest, index: int):
-    Task.objects.filter(id=index).update(completed=True)
-    return HttpResponseRedirect("/tasks")

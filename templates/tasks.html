@@ -1,7 +1,8 @@
 <h1>Tasks Management Application</h1>
 
 <h2>Search Tasks:</h2>
-<form action="/tasks" method="get">
+<form action="" method="get">
+  <input type="text" name="type" hidden="true" value="{{request.GET.type}}" />
   <input type="text" name="search" />
   <button type="submit">search</button>
 </form>
@@ -21,9 +22,13 @@
 
 <div>
   {%for page in paginator.page_range%}
-  <a href="?page={{page}}&search={{request.GET.search}}">{{page}}</a>
+  <a
+    href="?page={{page}}&type={{request.GET.type}}&search={{request.GET.search}}"
+    >{{page}}</a
+  >
   {% endfor %}
 </div>
 
-<a href="/completed_tasks">complted tasks page</a>
-<a href="/all_tasks">all tasks page</a>
+<a href="?type=completed&search={{request.GET.search}}">completed tasks page</a>
+<a href="?type=all&search={{request.GET.search}}">all tasks page</a>
+<a href="?type=pending&search={{request.GET.search}}">pending tasks page</a>

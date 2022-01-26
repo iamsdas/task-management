@@ -21,8 +21,6 @@ from tasks import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("tasks/", views.GenericTaskView.as_view()),
-    path("completed_tasks/", views.completed_tasks_view),
-    path("all_tasks/", views.all_tasks_view),
     path("create_task/", views.GenericCreateTaskView.as_view()),
     path("user/signup/", views.UserCreateView.as_view()),
     path("user/login/", views.UserLoginView.as_view()),
@@ -30,5 +28,5 @@ urlpatterns = [
     path("update_task/<pk>", views.GenericTaskUpdateView.as_view()),
     path("detail_task/<pk>", views.GenericTaskDetailView.as_view()),
     path("delete_task/<pk>", views.GenericTaskDeleteView.as_view()),
-    path("complete_task/<int:index>/", views.complete_task_view),
+    path("complete_task/<pk>/", views.MarkTaskCompleteView.as_view()),
 ]
