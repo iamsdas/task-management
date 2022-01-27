@@ -53,7 +53,9 @@
   >
     <!-- Task Details -->
     <div class="flex flex-col font-semibold overflow-hidden">
-      <a href="/detail_task/{{task.id}}" class="text-slate-900 text-md truncate"
+      <a
+        href="/detail_task/{{task.id}}"
+        class="text-md truncate {% if request.GET.type == 'all' and task.completed%} line-through text-red-500 {%else%}text-slate-900{%endif%}"
         >{{task.title}}</a
       >
       <span class="text-sm text-slate-500 truncate">{{task.created_date}}</span>

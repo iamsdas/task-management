@@ -47,16 +47,9 @@
   </div>
 
   <!-- Completed -->
-  <div class="w-full my-2 pt-4">
-    <input
-      id="{{ form.completed.id_for_label }}"
-      name="{{ form.completed.name }}"
-      type="{{ form.completed.widget_type }}"
-      class="bg-slate-100 rounded-2xl p-2 border-2 border-slate-300 checked:bg-red-500 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
-      value="{%if form.completed.value%}on{%else%}unchecked{%endif%}"
-    />
-    <span>{{ form.completed.label }}</span>
-    {{ form.completed.errors }}
+  <div class="w-full mt-2 p-1">
+    {{form.completed}}
+    <span class="ml-2">{{ form.completed.label }}</span>
   </div>
 
   <span class="text-red-500">{{form.non_field_errors }}</span>
