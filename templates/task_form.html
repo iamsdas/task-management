@@ -1,0 +1,70 @@
+{% extends "./base.html"%} {% block content %}
+
+<h1 class="text-3xl font-bold py-7">
+  {%if 'update' in request.path%} Update {%else%} Create {%endif%} Task
+</h1>
+
+<form action="" method="post" class="text-lg w-full">
+  {% csrf_token %}
+  <!-- Title -->
+  <div class="w-full my-2">
+    <span>{{ form.title.label }}:</span>
+    <input
+      id="{{ form.title.id_for_label }}"
+      name="{{ form.tile.html_name }}"
+      value="{% if form.title.value %}{{form.title.value}}{% endif %}"
+      type="{{ form.title.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 {% if form.title.name != 'completed'%} w-full {%endif%} border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    />
+    {{ form.title.errors }}
+  </div>
+
+  <!-- Desc -->
+  <div class="w-full my-2">
+    <span>{{ form.description.label }}:</span>
+    <textarea
+      id="{{ form.description.id_for_label }}"
+      name="{{ form.tile.html_name }}"
+      type="{{ form.description.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 border-2 w-full border-slate-300 checked:bg-red-500 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    >
+{% if form.title.value %}{{form.title.value}}{% endif %}</textarea
+    >
+    {{ form.description.errors }}
+  </div>
+
+  <!-- Priority -->
+  <div class="w-full my-2">
+    <span>{{ form.priority.label }}:</span>
+    <input
+      id="{{ form.priority.id_for_label }}"
+      name="{{ form.tile.html_name }}"
+      value="{% if form.priority.value %}{{form.priority.value}}{% endif %}"
+      type="{{ form.priority.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 {% if form.priority.name != 'completed'%} w-full {%endif%} border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    />
+    {{ form.priority.errors }}
+  </div>
+
+  <!-- Completed -->
+  <div class="w-full my-2 pt-4">
+    <input
+      id="{{ form.completed.id_for_label }}"
+      name="{{ form.tile.html_name }}"
+      value="{% if form.completed.value %}{{form.completed.value}}{% endif %}"
+      type="{{ form.completed.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-2 border-2 border-slate-300 checked:bg-red-500 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    />
+    <span>{{ form.completed.label }}</span>
+    {{ form.completed.errors }}
+  </div>
+
+  <!-- Submit -->
+  <button
+    type="submit"
+    class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
+  >
+    {%if 'update' in request.path%} Update {%else%} Add {%endif%}
+  </button>
+</form>
+{% endblock %}

@@ -40,22 +40,6 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
 
 class TaskCreateForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        style = {
-            "class": "w-full rounded-xl bg-slate-200 focus:border-red-300 focus:ring-red-300 focus:outline-none"
-        }
-
-        self.fields["title"].widget.attrs.update(style)
-        self.fields["description"].widget.attrs.update(style)
-        self.fields["priority"].widget.attrs.update(style)
-        self.fields["completed"].widget.attrs.update(
-            {
-                "class": "rounded-sm bg-slate-200 outline-none focus:border-red-300 focus:ring-red-300 checked:bg-red-400 appearance-none"
-            }
-        )
-        self.fields["priority"].inital = 1
-
     def clean_title(self):
         title = self.cleaned_data["title"]
         if len(title) < 1:
@@ -68,7 +52,7 @@ class TaskCreateForm(ModelForm):
         return priority
 
     def priority_update(self, priority: int):
-        task_obj = Task.objects.filter(priority=priority)
+        task_obj = Task.objects.filter(priority=priority, user=self.request.user)
         if task_obj.exists():
             self.priority_update(priority + 1)
             task_obj.update(priority=priority + 1)
@@ -80,7 +64,7 @@ class TaskCreateForm(ModelForm):
 
 class GenericCreateTaskView(CreateView):
     form_class = TaskCreateForm
-    template_name = "task_create.html"
+    template_name = "task_form.html"
     success_url = "/tasks"
 
     def form_valid(self, form):
@@ -93,7 +77,7 @@ class GenericCreateTaskView(CreateView):
 class GenericTaskUpdateView(AuthorizedTaskManager, UpdateView):
     model = Task
     form_class = TaskCreateForm
-    template_name = "task_update.html"
+    template_name = "task_form.html"
     success_url = "/tasks"
 
 

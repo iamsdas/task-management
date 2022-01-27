@@ -1,4 +1,28 @@
-<form action="" method="post">
-  {% csrf_token %} {{form.as_p}}
-  <button type="submit">Login</button>
-</form>
+{% extends "./base.html"%} {% block content %}
+<h1 class="text-3xl pt-2 font-bold block">Todo Manager</h1>
+<div class="flex flex-col justify-center items-center
+ h-2/3">
+  <h2 class="text-2xl  p-1 font-semibold">Login</h2>
+  <form action="" method="post">
+    {% csrf_token %}
+    {%for field in form%}
+      <div class="w-full my-2">
+      <span>{{ field.label }}:</span>
+      <input
+        id="{{ field.id_for_label }}"
+        name="{{ field.html_name }}"
+        value="{% if field.value %}{{field.value}}{% endif %}"
+        type="{{ field.widget_type }}"
+        class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+      />
+      {{ field.errors }}
+      {%endfor%}
+    <button
+      type="submit"
+      class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
+    >
+    Login
+    </button>
+  </form>
+</div>
+{%endblock%}
