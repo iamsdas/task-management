@@ -22,7 +22,7 @@ class GenericTaskView(LoginRequiredMixin, ListView):
     model = Task
     template_name = "tasks.html"
     context_object_name = "tasks"
-    paginate_by = 5
+    paginate_by = 4
 
     def get_queryset(self):
         tasks = Task.objects.filter(deleted=False, user=self.request.user)
@@ -40,11 +40,27 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
 
 class TaskCreateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        style = {
+            "class": "w-full rounded-xl bg-slate-200 focus:border-red-300 focus:ring-red-300 focus:outline-none"
+        }
+
+        self.fields["title"].widget.attrs.update(style)
+        self.fields["description"].widget.attrs.update(style)
+        self.fields["priority"].widget.attrs.update(style)
+        self.fields["completed"].widget.attrs.update(
+            {
+                "class": "rounded-sm bg-slate-200 outline-none focus:border-red-300 focus:ring-red-300 checked:bg-red-400 appearance-none"
+            }
+        )
+        self.fields["priority"].inital = 1
+
     def clean_title(self):
         title = self.cleaned_data["title"]
         if len(title) < 1:
             raise ValidationError("Title not cleaned")
-        return title.upper()
+        return title.capitalize()
 
     def clean_priority(self):
         priority = self.cleaned_data["priority"]

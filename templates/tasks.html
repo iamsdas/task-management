@@ -1,34 +1,92 @@
-<h1>Tasks Management Application</h1>
+{% extends "./base.html"%} {% block content %}
 
-<h2>Search Tasks:</h2>
-<form action="" method="get">
+<!-- User Header -->
+<div class="flex flex-row items-center justify-between w-full my-3 pb-2 px-3">
+  <div class="text-slate-900 font-bold text-3xl">Hi {{user.get_username}}</div>
+  <div>
+    <a href="/user/logout" class="text-red-500 text-md font-semibold"
+      >Log Out</a
+    >
+  </div>
+</div>
+
+<!-- Search Bar -->
+<form action="" method="get" class="w-full">
   <input type="text" name="type" hidden="true" value="{{request.GET.type}}" />
-  <input type="text" name="search" />
-  <button type="submit">search</button>
+  <input
+    type="text"
+    name="search"
+    placeholder="search task"
+    class="rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+  />
+  <input type="submit" hidden />
 </form>
 
-<h2>Tasks:</h2>
-<ol>
-  {% for task in tasks %}
-  <li>
-    <span>{{task.title}} [{{task.priority}}]</span>
-    <a href="/delete_task/{{task.id}}">delete</a>
-    <a href="/complete_task/{{task.id}}">mark as completd</a>
-    <a href="/update_task/{{task.id}}">Update Task</a>
-    <a href="/detail_task/{{task.id}}">Details</a>
-  </li>
-  {% endfor %}
-</ol>
+<!-- Task Type Filter -->
+<div
+  class="flex items-center justify-center w-full capitalize text-md my-4 font-semibold text-slate-900"
+>
+  <a
+    href="?type=all&search={{request.GET.search}}"
+    class="{% if request.GET.type == 'all'%} text-red-600 bg-red-200 {% endif %} py-3 px-5 rounded-3xl block"
+    >all</a
+  >
+  <a
+    href="?type=pending&search={{request.GET.search}}"
+    class="{% if request.GET.type == 'pending' or request.GET.type == null %} text-red-600 bg-red-200 {% endif %} py-3 px-5 rounded-3xl block"
+    >pending</a
+  >
+  <a
+    href="?type=completed&search={{request.GET.search}}"
+    class="{% if request.GET.type == 'completed'%} text-red-600 bg-red-200 {% endif %} py-3 px-5 rounded-3xl block"
+    >completed</a
+  >
+</div>
 
-<div>
+<!-- Tasks List -->
+<div class="w-full grow overflow-y-auto">
+  {% for task in tasks %}
+  <div
+    class="flex items-center w-full justify-between bg-slate-100 mb-5 py-4 px-6 rounded-2xl"
+  >
+    <!-- Task Details -->
+    <div class="flex flex-col font-semibold overflow-hidden">
+      <a href="/detail_task/{{task.id}}" class="text-slate-900 text-md truncate"
+        >{{task.title}}</a
+      >
+      <span class="text-sm text-slate-500 truncate">{{task.created_date}}</span>
+    </div>
+    <!-- Task Buttons -->
+    <div class="flex justify-around items-center gap-1 text-sm text-white">
+      <a
+        href="/update_task/{{task.id}}"
+        class="bg-teal-400 hover:bg-teal-500 p-2 rounded-md block"
+        ><i class="fa fa-pen p-1"></i
+      ></a>
+      <a
+        href="/delete_task/{{task.id}}"
+        class="bg-red-400 hover:bg-red-500 p-2 rounded-md block"
+        ><i class="fa fa-trash p-1"></i
+      ></a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+<!-- <div class="my-1">
   {%for page in paginator.page_range%}
   <a
     href="?page={{page}}&type={{request.GET.type}}&search={{request.GET.search}}"
     >{{page}}</a
   >
   {% endfor %}
-</div>
+</div> -->
 
-<a href="?type=completed&search={{request.GET.search}}">completed tasks page</a>
-<a href="?type=all&search={{request.GET.search}}">all tasks page</a>
-<a href="?type=pending&search={{request.GET.search}}">pending tasks page</a>
+<!-- Add Task Button -->
+<a
+  href="/create_task"
+  class="text-lg bg-red-400 text-white w-full py-3 text-center font-semibold rounded-2xl my-3"
+  >Add</a
+>
+{% endblock %}

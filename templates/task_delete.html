@@ -1,4 +1,6 @@
+{% extends "./base.html"%} {% block content %}
 <form action="" method="post">
   {% csrf_token %} Are you sure you want to delete task "{{object}}"?
   <button type="submit">Confirm</button>
 </form>
+{% endblock %}

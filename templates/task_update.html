@@ -1,3 +1,14 @@
-<form action="" method="post">
-  {% csrf_token %} {{form.as_p}} <button type="submit">Update Task</button>
+{% extends "./base.html"%} {% block content %}
+
+<h1 class="text-3xl font-bold py-7">Update Task</h1>
+
+<form action="" method="post" class="text-lg">
+  {% csrf_token %} {{form.as_p}}
+  <button
+    type="submit"
+    class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
+  >
+    Update
+  </button>
 </form>
+{% endblock %}

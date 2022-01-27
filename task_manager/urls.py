@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.urls import path
+from django.urls import path, include
 from tasks import views
 
 urlpatterns = [
@@ -29,4 +29,5 @@ urlpatterns = [
     path("detail_task/<pk>", views.GenericTaskDetailView.as_view()),
     path("delete_task/<pk>", views.GenericTaskDeleteView.as_view()),
     path("complete_task/<pk>/", views.MarkTaskCompleteView.as_view()),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
