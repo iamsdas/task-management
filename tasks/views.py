@@ -40,6 +40,10 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
 
 class TaskCreateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super(TaskCreateForm, self).__init__(*args, **kwargs)
+
     def clean_title(self):
         title = self.cleaned_data["title"]
         if len(title) < 1:
@@ -62,10 +66,15 @@ class TaskCreateForm(ModelForm):
         fields = ["title", "description", "completed", "priority"]
 
 
-class GenericCreateTaskView(CreateView):
+class GenericCreateTaskView(LoginRequiredMixin, CreateView):
     form_class = TaskCreateForm
     template_name = "task_form.html"
     success_url = "/tasks"
+
+    def get_form_kwargs(self):
+        kwargs = super(GenericCreateTaskView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
     def form_valid(self, form):
         self.object = form.save()
@@ -79,6 +88,11 @@ class GenericTaskUpdateView(AuthorizedTaskManager, UpdateView):
     form_class = TaskCreateForm
     template_name = "task_form.html"
     success_url = "/tasks"
+
+    def get_form_kwargs(self):
+        kwargs = super(GenericTaskUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
 
 class GenericTaskDetailView(AuthorizedTaskManager, DetailView):
