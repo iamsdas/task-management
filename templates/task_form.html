@@ -16,7 +16,7 @@
       type="{{ form.title.widget_type }}"
       class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
     />
-    {{ form.title.errors }}
+    <span class="text-red-500">{{ form.title.errors }}</span>
   </div>
 
   <!-- Desc -->
@@ -30,7 +30,7 @@
     >
 {% if form.description.value %}{{form.description.value}}{% endif %}</textarea
     >
-    {{ form.description.errors }}
+    <span class="text-red-500">{{ form.description.errors }}</span>
   </div>
 
   <!-- Priority -->
@@ -43,7 +43,7 @@
       type="{{ form.priority.widget_type }}"
       class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
     />
-    {{ form.priority.errors }}
+    <span class="text-red-500">{{ form.priority.errors }}</span>
   </div>
 
   <!-- Completed -->
@@ -52,7 +52,13 @@
     <span class="ml-2">{{ form.completed.label }}</span>
   </div>
 
-  <span class="text-red-500">{{form.non_field_errors }}</span>
+  {% if form.non_field_errors %}
+  <ul class="py-2 text-justify">
+    {% for error in form.non_field_errors %}
+    <li class="text-red-500">{{ error|escape }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 
   <!-- Submit -->
   <button

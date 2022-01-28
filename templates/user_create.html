@@ -18,14 +18,22 @@
        <span class="text-gray-500">{{field.help_text}}</span>
         {% endif %}
 {% if field.errors %}
-    <ol class="pt-2">
+    <ul class="pt-2">
     {% for error in field.errors %}
         <li class="text-red-500">{{ error|escape }}</li>
     {% endfor %}
-    </ol>
+    </ul>
 {% endif %}
       {%endfor%}
-<span class="text-red-500">{{form.non_field_errors }}</span>
+
+{% if form.non_field_errors %}
+    <ul class="py-2 text-justify">
+      {% for error in form.non_field_errors %}
+      <li class="text-red-500">{{ error|escape }}</li>
+      {% endfor %}
+    </ul>
+{% endif %}
+
     <button
       type="submit"
       class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
