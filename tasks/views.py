@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponseRedirect
 from django.views.generic import ListView, View
@@ -55,16 +56,21 @@ class GenericTaskFormView(AuthorizedTaskManager):
     template_name = "task_form.html"
     success_url = "/tasks"
 
-    def priority_update_helper(self, priority: int):
-        task_obj = self.get_queryset().filter(priority=priority)
-        if task_obj.exists():
-            self.priority_update_helper(priority + 1)
-            task_obj.update(priority=priority + 1)
-
     def fix_priority(self, priority: int, id: int):
-        task = self.get_queryset().filter(priority=priority, id=id)
-        if not task.exists():
-            self.priority_update_helper(priority)
+        with transaction.atomic():
+            tasks = self.get_queryset().select_for_update()
+            update_queries = []
+
+            if tasks.filter(id=id, priority=priority).exists():
+                return
+
+            while tasks.filter(priority=priority).exists():
+                task = tasks.get(priority=priority)
+                priority += 1
+                task.priority += 1
+                update_queries.append(task)
+
+            Task.objects.bulk_update(update_queries, ["priority"])
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
