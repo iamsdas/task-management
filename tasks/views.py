@@ -22,7 +22,6 @@ class GenericTaskView(LoginRequiredMixin, ListView):
     model = Task
     template_name = "tasks.html"
     context_object_name = "tasks"
-    paginate_by = 4
 
     def get_queryset(self):
         tasks = Task.objects.filter(deleted=False, user=self.request.user)
@@ -40,59 +39,47 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
 
 class TaskCreateForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
-        super(TaskCreateForm, self).__init__(*args, **kwargs)
-
     def clean_title(self):
         title = self.cleaned_data["title"]
         if len(title) < 1:
             raise ValidationError("Title not cleaned")
         return title.capitalize()
 
-    def clean_priority(self):
-        priority = self.cleaned_data["priority"]
-        self.priority_update(priority)
-        return priority
-
-    def priority_update(self, priority: int):
-        task_obj = Task.objects.filter(priority=priority, user=self.request.user)
-        if task_obj.exists():
-            self.priority_update(priority + 1)
-            task_obj.update(priority=priority + 1)
-
     class Meta:
         model = Task
         fields = ["title", "description", "completed", "priority"]
 
 
-class GenericCreateTaskView(LoginRequiredMixin, CreateView):
+class GenericTaskFormView(AuthorizedTaskManager):
     form_class = TaskCreateForm
     template_name = "task_form.html"
     success_url = "/tasks"
 
-    def get_form_kwargs(self):
-        kwargs = super(GenericCreateTaskView, self).get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
+    def priority_update_helper(self, priority: int):
+        task_obj = self.get_queryset().filter(priority=priority)
+        if task_obj.exists():
+            self.priority_update_helper(priority + 1)
+            task_obj.update(priority=priority + 1)
+
+    def fix_priority(self, priority: int, id: int):
+        task = self.get_queryset().filter(priority=priority, id=id)
+        if not task.exists():
+            self.priority_update_helper(priority)
 
     def form_valid(self, form):
-        self.object = form.save()
+        self.object = form.save(commit=False)
         self.object.user = self.request.user
+        self.fix_priority(self.object.priority, self.object.id)
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
 
-class GenericTaskUpdateView(AuthorizedTaskManager, UpdateView):
-    model = Task
-    form_class = TaskCreateForm
-    template_name = "task_form.html"
-    success_url = "/tasks"
+class GenericCreateTaskView(GenericTaskFormView, CreateView):
+    pass
 
-    def get_form_kwargs(self):
-        kwargs = super(GenericTaskUpdateView, self).get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
+
+class GenericTaskUpdateView(GenericTaskFormView, UpdateView):
+    pass
 
 
 class GenericTaskDetailView(AuthorizedTaskManager, DetailView):
