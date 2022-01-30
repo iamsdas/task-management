@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponseRedirect
@@ -40,11 +40,11 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
 
 class TaskCreateForm(ModelForm):
-    def clean_title(self):
-        title = self.cleaned_data["title"]
-        if len(title) < 1:
-            raise ValidationError("Title not cleaned")
-        return title.capitalize()
+    def clean_priority(self):
+        priority = self.cleaned_data["priority"]
+        if priority <= 0:
+            raise ValidationError("Priority must be greater than 0")
+        return priority
 
     class Meta:
         model = Task
@@ -59,16 +59,18 @@ class GenericTaskFormView(AuthorizedTaskManager):
     def fix_priority(self, priority: int, id: int):
         with transaction.atomic():
             tasks = self.get_queryset().select_for_update()
+            loop_flag = not tasks.filter(id=id, priority=priority).exists()
+            tasks = tasks.exclude(id=id)
             update_queries = []
 
-            if tasks.filter(id=id, priority=priority).exists():
-                return
-
-            while tasks.filter(priority=priority).exists():
-                task = tasks.get(priority=priority)
-                priority += 1
-                task.priority += 1
-                update_queries.append(task)
+            while loop_flag:
+                try:
+                    task = tasks.get(priority=priority)
+                    priority += 1
+                    task.priority += 1
+                    update_queries.append(task)
+                except ObjectDoesNotExist:
+                    loop_flag = False
 
             Task.objects.bulk_update(update_queries, ["priority"])
 
