@@ -56,28 +56,30 @@ class GenericTaskFormView(AuthorizedTaskManager):
     template_name = "task_form.html"
     success_url = "/tasks"
 
-    def fix_priority(self, priority: int, id: int):
+    def fix_priority(self, priority: int, id: int, completed: bool):
         with transaction.atomic():
-            tasks = self.get_queryset().select_for_update()
-            loop_flag = not tasks.filter(id=id, priority=priority).exists()
+            tasks = self.get_queryset().filter(completed=False).select_for_update()
+            if completed or tasks.filter(id=id, priority=priority).exists():
+                return
+
             tasks = tasks.exclude(id=id)
             update_queries = []
 
-            while loop_flag:
+            while True:
                 try:
                     task = tasks.get(priority=priority)
                     priority += 1
                     task.priority += 1
                     update_queries.append(task)
                 except ObjectDoesNotExist:
-                    loop_flag = False
+                    break
 
             Task.objects.bulk_update(update_queries, ["priority"])
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.user = self.request.user
-        self.fix_priority(self.object.priority, self.object.id)
+        self.fix_priority(self.object.priority, self.object.id, self.object.completed)
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
