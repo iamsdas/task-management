@@ -17,6 +17,11 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from tasks import views
+from tasks.apiviews import TaskViewSet
+from rest_framework.routers import SimpleRouter
+
+router = SimpleRouter()
+router.register("api/tasks", TaskViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,4 +35,4 @@ urlpatterns = [
     path("delete_task/<pk>", views.GenericTaskDeleteView.as_view()),
     path("complete_task/<pk>/", views.MarkTaskCompleteView.as_view()),
     path("__reload__/", include("django_browser_reload.urls")),
-]
+] + router.urls
