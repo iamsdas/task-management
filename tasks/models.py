@@ -1,5 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 STATUS_CHOICES = (
     ("PENDING", "PENDING"),
@@ -23,3 +25,22 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class StatusHistory(models.Model):
+    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    old_status = models.CharField(max_length=100, choices=STATUS_CHOICES)
+    new_status = models.CharField(max_length=100, choices=STATUS_CHOICES)
+    updation_date = models.DateTimeField(auto_now=True)
+
+
+@receiver(pre_save, sender=Task)
+def update_status_history(sender, instance, **kwargs):
+    if not instance._state.adding:
+        print("calling function")
+        old_task = Task.objects.get(pk=instance.pk)
+        old_status = old_task.status
+        new_status = instance.status
+        StatusHistory.objects.create(
+            task_id=instance, old_status=old_status, new_status=new_status
+        )

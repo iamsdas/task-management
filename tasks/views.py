@@ -48,7 +48,7 @@ class TaskCreateForm(ModelForm):
 
     class Meta:
         model = Task
-        fields = ["title", "description", "completed", "priority"]
+        fields = ["title", "description", "completed", "status", "priority"]
 
 
 class GenericTaskFormView(AuthorizedTaskManager):

@@ -8,8 +8,9 @@ from django_filters.rest_framework import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListAPIView
 
-from tasks.models import STATUS_CHOICES, Task
+from tasks.models import STATUS_CHOICES, StatusHistory, Task
 
 
 class TaskFilter(FilterSet):
@@ -43,3 +44,21 @@ class TaskViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class StatusHistorySerializer(ModelSerializer):
+    class Meta:
+        model = StatusHistory
+        fields = ["old_status", "new_status", "updation_date"]
+
+
+class StatusHistoryView(ListAPIView):
+    queryset = StatusHistory.objects.all()
+    serializer_class = StatusHistorySerializer
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["updation_date", "new_status"]
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
+        return StatusHistory.objects.filter(task_id=id)
