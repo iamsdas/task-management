@@ -61,4 +61,6 @@ class StatusHistoryView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs["id"]
-        return StatusHistory.objects.filter(task_id=id)
+        if Task.objects.filter(id=id, user=self.request.user, deleted=False).exists():
+            return StatusHistory.objects.filter(task_id=id)
+        return StatusHistory.objects.none()
