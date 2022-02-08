@@ -37,7 +37,6 @@ class StatusHistory(models.Model):
 @receiver(pre_save, sender=Task)
 def update_status_history(sender, instance, **kwargs):
     if not instance._state.adding:
-        print(instance)
         old_task = Task.objects.get(pk=instance.pk)
         old_status = old_task.status
         new_status = instance.status
