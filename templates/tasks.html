@@ -3,7 +3,12 @@
 <!-- User Header -->
 <div class="flex flex-row items-center justify-between w-full my-3 pb-2 px-3">
   <div class="text-slate-900 font-bold text-3xl">Hi {{user.get_username}}</div>
-  <div>
+  <div class="space-x-2">
+    <a
+      href="/settings/{{settings_id}}"
+      class="text-gray-500 text-md font-semibold"
+      >Settings</a
+    >
     <a
       href="/user/logout/?next=/user/login"
       class="text-red-500 text-md font-semibold"

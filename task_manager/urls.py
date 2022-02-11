@@ -20,5 +20,6 @@ urlpatterns = [
     path("delete_task/<pk>", views.GenericTaskDeleteView.as_view()),
     path("complete_task/<pk>/", views.MarkTaskCompleteView.as_view()),
     path("api/history/<id>", StatusHistoryView.as_view()),
+    path("settings/<pk>", views.SettingsView.as_view()),
     path("__reload__/", include("django_browser_reload.urls")),
 ] + router.urls

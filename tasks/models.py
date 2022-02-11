@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 STATUS_CHOICES = (
@@ -34,6 +34,11 @@ class StatusHistory(models.Model):
     updation_date = models.DateTimeField(auto_now=True)
 
 
+class UserSetting(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    preffered_mail_hour = models.IntegerField(default=0)
+
+
 @receiver(pre_save, sender=Task)
 def update_status_history(sender, instance, **kwargs):
     if not instance._state.adding:
@@ -44,3 +49,9 @@ def update_status_history(sender, instance, **kwargs):
             StatusHistory.objects.create(
                 task_id=instance, old_status=old_status, new_status=new_status
             )
+
+
+@receiver(post_save, sender=User)
+def create_user_settings(sender, instance, created, **kwargs):
+    if created:
+        UserSetting.objects.create(user=instance)

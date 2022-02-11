@@ -1,0 +1,45 @@
+
+{% extends "./base.html"%} {% block content %}
+<div class="flex flex-col justify-start items-center grow">
+  <h2 class="text-2xl p-5 font-semibold">Daily Report Timings</h2>
+  <form action="" method="post">
+    {% csrf_token %}
+    {%for field in form%}
+      <div class="w-full my-3">
+      <span>{{ field.label }} (in 24 hr format):</span>
+      <input
+        id="{{ field.id_for_label }}"
+        name="{{ field.html_name }}"
+        value="{% if field.value %}{{field.value}}{% endif %}"
+        type="{{ field.widget_type }}"
+        class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+      />
+       {% if field.help_text %}
+       <span class="text-gray-500">{{field.help_text}}</span>
+        {% endif %}
+{% if field.errors %}
+    <ul class="pt-2">
+    {% for error in field.errors %}
+        <li class="text-red-500">{{ error|escape }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+      {%endfor%}
+
+{% if form.non_field_errors %}
+    <ul class="py-2 text-justify">
+      {% for error in form.non_field_errors %}
+      <li class="text-red-500">{{ error|escape }}</li>
+      {% endfor %}
+    </ul>
+{% endif %}
+
+    <button
+      type="submit"
+      class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
+    >Update</button>
+  </form>
+</div>
+{%endblock%}
+
+

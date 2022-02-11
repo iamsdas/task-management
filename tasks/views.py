@@ -1,3 +1,5 @@
+from dataclasses import fields
+from typing import Any, Dict
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -9,7 +11,7 @@ from django.views.generic import ListView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from tasks.models import Task
+from tasks.models import Task, UserSetting
 
 
 class AuthorizedTaskManager(LoginRequiredMixin):
@@ -23,6 +25,12 @@ class GenericTaskView(LoginRequiredMixin, ListView):
     model = Task
     template_name = "tasks.html"
     context_object_name = "tasks"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        obj, _ = UserSetting.objects.get_or_create(user=self.request.user)
+        context["settings_id"] = obj.pk
+        return context
 
     def get_queryset(self):
         tasks = Task.objects.filter(deleted=False, user=self.request.user)
@@ -119,3 +127,24 @@ class UserCreateView(CreateView):
     form_class = UserCreationForm
     template_name = "user_create.html"
     success_url = "/user/login"
+
+
+class SettingsForm(ModelForm):
+    def clean_preffered_mail_hour(self):
+        time = self.cleaned_data["preffered_mail_hour"]
+        if time < 0 or time > 23:
+            raise ValidationError("Invalid Hour")
+        return time
+
+    class Meta:
+        model = UserSetting
+        fields = ["preffered_mail_hour"]
+
+
+class SettingsView(UpdateView, LoginRequiredMixin):
+    form_class = SettingsForm
+    success_url = "/tasks"
+    template_name = "settings.html"
+
+    def get_queryset(self):
+        return UserSetting.objects.filter(user=self.request.user)

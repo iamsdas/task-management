@@ -3,14 +3,15 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from task_manager.celery import app
 
-from tasks.models import STATUS_CHOICES, Task
+from tasks.models import STATUS_CHOICES, Task, UserSetting
 
 
 @app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     for user in User.objects.all():
+        settings, _ = UserSetting.objects.get_or_create(user=user)
         sender.add_periodic_task(
-            crontab(0),
+            crontab(hour=settings.preffered_mail_hour),
             send_mail_reminder.s(user.id),
         )
 
