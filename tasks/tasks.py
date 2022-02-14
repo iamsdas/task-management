@@ -1,3 +1,4 @@
+from datetime import datetime
 from celery.schedules import crontab
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -11,12 +12,17 @@ def setup_periodic_tasks(sender, **kwargs):
     for user in User.objects.all():
         settings, _ = UserSetting.objects.get_or_create(user=user)
         sender.add_periodic_task(
-            crontab(hour=settings.preffered_mail_hour),
-            send_mail_reminder.s(user.id),
+            crontab(hour="*", minute=0),
+            mail_helper.s(user.id, settings.preffered_mail_hour),
         )
 
 
 @app.task
+def mail_helper(user, preffered_time):
+    if datetime.now().hour == preffered_time:
+        send_mail_reminder(user)
+
+
 def send_mail_reminder(user):
     print(f"starting to process mail for user {user}")
 
