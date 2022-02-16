@@ -34,9 +34,10 @@ class StatusHistory(models.Model):
     updation_date = models.DateTimeField(auto_now=True)
 
 
-class UserSetting(models.Model):
+class UserMetadata(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     preffered_mail_hour = models.IntegerField(default=0)
+    previous_report_date = models.IntegerField(default=0)
 
 
 @receiver(pre_save, sender=Task)
@@ -54,4 +55,4 @@ def update_status_history(sender, instance, **kwargs):
 @receiver(post_save, sender=User)
 def create_user_settings(sender, instance, created, **kwargs):
     if created:
-        UserSetting.objects.create(user=instance)
+        UserMetadata.objects.create(user=instance)

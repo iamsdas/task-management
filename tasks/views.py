@@ -11,7 +11,7 @@ from django.views.generic import ListView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from tasks.models import Task, UserSetting
+from tasks.models import Task, UserMetadata
 
 
 class AuthorizedTaskManager(LoginRequiredMixin):
@@ -28,7 +28,7 @@ class GenericTaskView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        obj, _ = UserSetting.objects.get_or_create(user=self.request.user)
+        obj, _ = UserMetadata.objects.get_or_create(user=self.request.user)
         context["settings_id"] = obj.pk
         return context
 
@@ -137,7 +137,7 @@ class SettingsForm(ModelForm):
         return time
 
     class Meta:
-        model = UserSetting
+        model = UserMetadata
         fields = ["preffered_mail_hour"]
 
 
@@ -147,4 +147,4 @@ class SettingsView(UpdateView, LoginRequiredMixin):
     template_name = "settings.html"
 
     def get_queryset(self):
-        return UserSetting.objects.filter(user=self.request.user)
+        return UserMetadata.objects.filter(user=self.request.user)
