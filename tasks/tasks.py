@@ -18,12 +18,12 @@ def setup_periodic_tasks(sender, **kwargs):
 @app.task(bind=True)
 def mail_helper(self):
     date = datetime.now()
-    for user_data in UserMetadata.objects.exclude(prev_date=date.day).filter(
-        preffered_time__lte=date.hour
+    for user_data in UserMetadata.objects.exclude(previous_report_date=date.day).filter(
+        preffered_mail_hour__lte=date.hour
     ):
         try:
             send_mail_reminder(user_data.user)
-            user_data.prev_date = date.day
+            user_data.previous_report_date = date.day
             user_data.save()
         except:
             self.retry(countdown=10)
