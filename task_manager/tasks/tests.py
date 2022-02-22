@@ -1,11 +1,13 @@
 from datetime import datetime
-from django.contrib.auth.models import User
+
+from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
+from task_manager.tasks.tasks import mail_helper
 
-from tasks.tasks import mail_helper, send_mail_reminder
+from task_manager.tasks.models import StatusHistory, Task, UserMetadata
+from task_manager.tasks.views import GenericTaskView, SettingsForm, TaskCreateForm
 
-from .models import StatusHistory, Task, UserMetadata
-from .views import GenericTaskView, SettingsForm, SettingsView, TaskCreateForm
+User = get_user_model()
 
 
 class TasksViewTest(TestCase):
