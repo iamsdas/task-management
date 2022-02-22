@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -11,7 +12,9 @@ from django.views.generic import ListView, View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from tasks.models import Task, UserMetadata
+from task_manager.tasks.models import Task, UserMetadata
+
+User = get_user_model()
 
 
 class AuthorizedTaskManager(LoginRequiredMixin):
@@ -123,8 +126,14 @@ class UserLoginView(LoginView):
     template_name = "user_login.html"
 
 
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ("username",)
+
+
 class UserCreateView(CreateView):
-    form_class = UserCreationForm
+    form_class = CustomUserCreationForm
     template_name = "user_create.html"
     success_url = "/user/login"
 

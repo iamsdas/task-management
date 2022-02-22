@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 STATUS_CHOICES = (
@@ -21,7 +21,9 @@ class Task(models.Model):
     status = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0]
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
 
     def __str__(self):
         return self.title
@@ -35,7 +37,9 @@ class StatusHistory(models.Model):
 
 
 class UserMetadata(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True
+    )
     preffered_mail_hour = models.IntegerField(default=0)
     previous_report_date = models.IntegerField(default=0)
 
@@ -52,7 +56,7 @@ def update_status_history(sender, instance, **kwargs):
             )
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_settings(sender, instance, created, **kwargs):
     if created:
         UserMetadata.objects.create(user=instance)

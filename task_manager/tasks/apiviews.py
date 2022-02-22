@@ -1,16 +1,16 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django_filters.rest_framework import (
     CharFilter,
     ChoiceFilter,
     DjangoFilterBackend,
     FilterSet,
 )
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import ListAPIView
 
-from .models import STATUS_CHOICES, StatusHistory, Task
+from task_manager.tasks.models import STATUS_CHOICES, StatusHistory, Task
 
 
 class TaskFilter(FilterSet):
@@ -20,7 +20,7 @@ class TaskFilter(FilterSet):
 
 class UserSerializer(ModelSerializer):
     class Meta:
-        model = User
+        model = settings.AUTH_USER_MODEL
         fields = ["first_name", "last_name", "username"]
 
 

@@ -1,0 +1,74 @@
+{% extends "./base.html"%} {% block content %}
+
+<h1 class="text-3xl font-bold py-7">
+  {%if 'update' in request.path%} Update {%else%} Create {%endif%} Task
+</h1>
+
+<form action="" method="post" class="text-lg w-full">
+  {% csrf_token %}
+  <!-- Title -->
+  <div class="w-full my-2">
+    <span>{{ form.title.label }}:</span>
+    <input
+      id="{{ form.title.id_for_label }}"
+      name="{{ form.title.name }}"
+      value="{% if form.title.value %}{{form.title.value}}{% endif %}"
+      type="{{ form.title.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    />
+    <span class="text-red-500">{{ form.title.errors }}</span>
+  </div>
+
+  <!-- Desc -->
+  <div class="w-full my-2">
+    <span>{{ form.description.label }}:</span>
+    <textarea
+      id="{{ form.description.id_for_label }}"
+      name="{{ form.description.name }}"
+      type="{{ form.description.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 border-2 w-full border-slate-300 checked:bg-red-500 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    >
+{% if form.description.value %}{{form.description.value}}{% endif %}</textarea
+    >
+    <span class="text-red-500">{{ form.description.errors }}</span>
+  </div>
+
+  <!-- Status -->
+  {{form.status}}
+
+  <!-- Priority -->
+  <div class="w-full my-2">
+    <span>{{ form.priority.label }}:</span>
+    <input
+      id="{{ form.priority.id_for_label }}"
+      name="{{ form.priority.name }}"
+      value="{% if form.priority.value %}{{form.priority.value}}{% endif %}"
+      type="{{ form.priority.widget_type }}"
+      class="bg-slate-100 rounded-2xl p-3 w-full border-2 border-slate-300 focus:outline-none focus:border-red-200 focus:ring-red-200 focus:ring-1"
+    />
+    <span class="text-red-500">{{ form.priority.errors }}</span>
+  </div>
+
+  <!-- Completed -->
+  <div class="w-full mt-2 p-1">
+    {{form.completed}}
+    <span class="ml-2">{{ form.completed.label }}</span>
+  </div>
+
+  {% if form.non_field_errors %}
+  <ul class="py-2 text-justify">
+    {% for error in form.non_field_errors %}
+    <li class="text-red-500">{{ error|escape }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- Submit -->
+  <button
+    type="submit"
+    class="bg-red-400 text-white rounded-2xl w-full py-3 mt-4 font-semibold"
+  >
+    {%if 'update' in request.path%} Update {%else%} Add {%endif%}
+  </button>
+</form>
+{% endblock %}

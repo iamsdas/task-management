@@ -6,6 +6,10 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
+from task_manager.tasks import views
+from django.contrib.auth.views import LogoutView
+
+from task_manager.tasks.apiviews import StatusHistoryView
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -16,8 +20,19 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("task_manager.users.urls", namespace="users")),
-    path("accounts/", include("allauth.urls")),
+    # path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
+    path("tasks/", views.GenericTaskView.as_view()),
+    path("create_task/", views.GenericCreateTaskView.as_view()),
+    path("update_task/<pk>", views.GenericTaskUpdateView.as_view()),
+    path("detail_task/<pk>", views.GenericTaskDetailView.as_view()),
+    path("delete_task/<pk>", views.GenericTaskDeleteView.as_view()),
+    path("complete_task/<pk>/", views.MarkTaskCompleteView.as_view()),
+    path("api/history/<id>", StatusHistoryView.as_view()),
+    path("settings/<pk>", views.SettingsView.as_view()),
+    path("user/signup/", views.UserCreateView.as_view()),
+    path("user/login/", views.UserLoginView.as_view()),
+    path("user/logout/", LogoutView.as_view()),
     path("__reload__/", include("django_browser_reload.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -1,0 +1,14 @@
+{% extends "./base.html"%} {% block content %}
+<div class="flex flex-col items-center grow">
+  <div class="p-10 rounded-3xl">
+    <div class="text-slate-800 text-3xl font-semibold pb-5">
+      {{object.title}}
+    </div>
+    <div class="text-slate-600 text-lg">Date: {{object.created_date}}</div>
+    <div class="text-slate-600 text-lg">Priority: {{object.priority}}</div>
+    <div class="text-slate-600 text-lg">Completed: {{object.completed}}</div>
+    <div class="text-2xl text-justify pt-4">{{object.description}}</div>
+  </div>
+</div>
+
+{%endblock%}
