@@ -6,6 +6,7 @@ from pathlib import Path
 import environ
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
+BASE_DIR = ROOT_DIR
 # task_manager/
 APPS_DIR = ROOT_DIR / "task_manager"
 env = environ.Env()
@@ -338,3 +339,4 @@ SPECTACULAR_SETTINGS = {
 # Your stuff...
 # ------------------------------------------------------------------------------
 TAILWIND_APP_NAME = "theme"
+WHITENOISE_MANIFEST_STRICT = False
